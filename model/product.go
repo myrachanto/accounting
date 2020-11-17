@@ -15,6 +15,7 @@ type Product struct {
 	Majorcategory string ` json:"majorcategory"`
 	Picture string `json:"picture"`
 	Price float64 `json:"price"`
+	Quantity int64 `json:"quantity"`
 	gorm.Model
 }
 

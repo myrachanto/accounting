@@ -6,19 +6,27 @@ import (
 )
 
 type Price struct {
-	Name string `gorm:"not null"`
-	Product Product `gorm:"foreignKey:UserID; not null"`
-	ProductID uint `json:"userid"`
-	Amount float64 
-	Buy bool
+	Name string `gorm:"not null" json:"name"` 
+	Title string `gorm:"not null" json:"title"`
+	Description string `gorm:"not null" json:"description"`
+	// MajorpriceID uint `json:"majorpriceid"`
+	Product string ` json:"product"`
 	gorm.Model
 }
 func (price Price) Validate() *httperors.HttpError{ 
-	if price.Name == ""  {
+	if price.Name == "" && len(price.Name) < 3 {
 		return httperors.NewNotFoundError("Invalid Name")
 	}
-	if price.Amount == 0 {
-		return httperors.NewNotFoundError("Invalid amount")
+	if price.Title == "" && len(price.Title) < 3 {
+		return httperors.NewNotFoundError("Invalid Title")
+	}
+	
+	if price.Product == "" {
+		return httperors.NewNotFoundError("Invalid Product")
+	}
+	
+	if price.Description == "" && len(price.Description) < 10 {
+		return httperors.NewNotFoundError("Invalid description")
 	}
 	return nil
 }

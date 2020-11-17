@@ -29,6 +29,13 @@ func (controller priceController) Create(c echo.Context) error {
 	}
 	return c.JSON(http.StatusCreated, createdprice)
 }
+func (controller priceController) View(c echo.Context) error {
+	options, problem := service.PriceService.View()
+	if problem != nil {
+		return c.JSON(problem.Code, problem)
+	}
+	return c.JSON(http.StatusOK, options)	
+}
 func (controller priceController) GetAll(c echo.Context) error {
 	prices := []model.Price{}
 	column := string(c.QueryParam("column"))

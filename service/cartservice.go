@@ -23,6 +23,13 @@ func (service cartservice) Create(cart *model.Cart) (*model.Cart, *httperors.Htt
 	 return cart, nil
 
 }
+func (service cartservice) View(code string) ([]model.Cart, *httperors.HttpError) {
+	options, err1 := r.Cartrepo.View(code)
+	if err1 != nil {
+		return nil, err1
+	}
+	return options, nil
+}
 func (service cartservice) GetOne(id int) (*model.Cart, *httperors.HttpError) {
 	cart, err1 := r.Cartrepo.GetOne(id)
 	if err1 != nil {

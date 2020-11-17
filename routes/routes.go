@@ -111,6 +111,7 @@ func StoreApi() {
 	// JWTgroup.GET("cart/create", controllers.CartController.View)
 	JWTgroup.POST("cart", controllers.CartController.Create)
 	JWTgroup.GET("cart", controllers.CartController.GetAll)
+	JWTgroup.GET("cart/view/:id", controllers.CartController.View)
 	JWTgroup.GET("cart/:id", controllers.CartController.GetOne)
 	JWTgroup.PUT("cart/:id", controllers.CartController.Update)
 	JWTgroup.DELETE("cart/:id", controllers.CartController.Delete)
@@ -123,7 +124,7 @@ func StoreApi() {
 	JWTgroup.PUT("customer/:id", controllers.CustomerController.Update)
 	JWTgroup.DELETE("customer/:id", controllers.CustomerController.Delete)
 	///////////Invoice/////////////////////////////	
-	JWTgroup.GET("invoice/create", controllers.InvoiceController.View)
+	JWTgroup.GET("invoice/view", controllers.InvoiceController.View)
 	JWTgroup.POST("invoice", controllers.InvoiceController.Create)
 	JWTgroup.GET("invoice", controllers.InvoiceController.GetAll)
 	JWTgroup.GET("invoice/:id", controllers.InvoiceController.GetOne)
@@ -202,6 +203,7 @@ func StoreApi() {
 	//////////////////////////////////////////////////////////////////////////
 	///////////////////Miscellenous module///////////////////////////////////////
 	///////////prices/////////////////////////////////////////////////////
+	JWTgroup.GET("prices/view", controllers.PriceController.View)
 	JWTgroup.POST("prices", controllers.PriceController.Create)
 	JWTgroup.GET("prices", controllers.PriceController.GetAll)
 	JWTgroup.GET("prices/:id", controllers.PriceController.GetOne)

@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"strings"
+	"strconv"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/myrachanto/accounting/httperors"
 	"github.com/myrachanto/accounting/model"
@@ -39,10 +40,42 @@ func (invoiceRepo invoicerepo) Create(invoice *model.Invoice) (*model.Invoice, *
 	IndexRepo.DbClose(GormDB)
 	return invoice, nil
 }
-func (invoiceRepo invoicerepo) View() (string, *httperors.HttpError) {
-	code,err := invoiceRepo.GeneCode()
-	return code, err
-}
+func (invoiceRepo invoicerepo) View() (*model.Cinvoiceoptions, *httperors.HttpError) {
+	CIOptions := &model.Cinvoiceoptions{}
+
+	customers,err1 := Customerrepo.All()
+	if err1 != nil {
+		return nil, httperors.NewNotFoundError("You got an error fetching customers")
+	}
+	taxs,err2 := Taxrepo.All()
+	if err2 != nil {
+		return nil, httperors.NewNotFoundError("You got an error fetching customers")
+	}
+
+	products,err3 := Productrepo.All()
+	if err3 != nil {
+		return nil, httperors.NewNotFoundError("You got an error fetching customers")
+	}
+	prices,err5 := Pricerepo.All()
+	if err5 != nil {
+		return nil, httperors.NewNotFoundError("You got an error fetching customers")
+	}	
+	discounts,err6 := Discountrepo.All()
+	if err6 != nil {
+		return nil, httperors.NewNotFoundError("You got an error fetching customers")
+	}
+	code,err4 := invoiceRepo.GeneCode()
+	if err4 != nil {
+		return nil, httperors.NewNotFoundError("You got an error fetching customers")
+	}
+	CIOptions.Code = code
+	CIOptions.Customers = customers
+	CIOptions.Taxs = taxs
+	CIOptions.Products = products
+	CIOptions.Prices = prices
+	CIOptions.Discounts = discounts
+	return CIOptions, nil
+} 
 func (invoiceRepo invoicerepo) GetOne(id int) (*model.Invoice, *httperors.HttpError) {
 	ok := invoiceRepo.invoiceUserExistByid(id)
 	if !ok {
@@ -169,13 +202,13 @@ func (invoiceRepo invoicerepo)GeneCode() (string, *httperors.HttpError) {
 		return "", err1
 	}
 	if GormDB.Last(&invoice).RecordNotFound(){
-		c1 := 1
-		code := "CustInvNo_"+ string(c1)
+		var c1 uint = 1
+		code := "CustInvNo"+strconv.FormatUint(uint64(c1), 10)
 		return code, nil
 	 }
 	GormDB.Last(&invoice)
 	c1 := invoice.ID + 1
-	code := "CustInvNo_"+ string(c1)
+	code := "CustInvNo"+strconv.FormatUint(uint64(c1), 10)
 	IndexRepo.DbClose(GormDB)
 	return code, nil
 	

@@ -4,6 +4,8 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/myrachanto/accounting/httperors"
 	"github.com/myrachanto/accounting/model"
+	"github.com/vcraescu/go-paginator" 
+	"github.com/vcraescu/go-paginator/adapter"
 )
 
 var (
@@ -29,6 +31,12 @@ func (cartRepo cartrepo) Create(cart *model.Cart) (*model.Cart, *httperors.HttpE
 	// 	return nil, err
 	// }
 	// cart.Code = code
+	
+	grossamount := cart.Quantity * cart.Price
+	taxamount := cart.Tax/100 * grossamount
+	discountamount := cart.Discount/100 * grossamount
+	// console.log(grossamount,taxamount,discountamount)
+	cart.Total = grossamount - discountamount + taxamount
 	code := cart.Code
 	ok := Invoicerepo.InvoiceExistByCode(code)
 	if ok == true {
@@ -37,6 +45,26 @@ func (cartRepo cartrepo) Create(cart *model.Cart) (*model.Cart, *httperors.HttpE
 	GormDB.Create(&cart)
 	IndexRepo.DbClose(GormDB)
 	return cart, nil
+}
+func (cartRepo cartrepo) View(code string) ([]model.Cart, *httperors.HttpError) {
+	mc, e := cartRepo.Getcarts(code)
+	if e != nil{
+		return nil, e
+	}
+	return mc, nil
+}
+func (cartRepo cartrepo) Getcarts(code string) (t []model.Cart, e *httperors.HttpError) {
+
+	cart := model.Cart{}
+	GormDB, err1 :=IndexRepo.Getconnected()
+	if err1 != nil {
+		return nil, err1
+	}
+	
+	GormDB.Model(&cart).Where("code = ?", code).Find(&t)
+	IndexRepo.DbClose(GormDB)
+	
+	return t, nil
 }
 func (cartRepo cartrepo) GetOne(id int) (*model.Cart, *httperors.HttpError) {
 	ok := cartRepo.cartUserExistByid(id)
@@ -54,7 +82,25 @@ func (cartRepo cartrepo) GetOne(id int) (*model.Cart, *httperors.HttpError) {
 	
 	return &cart, nil
 }
+func (cartRepo cartrepo) All() (t []model.Cart, r *httperors.HttpError) {
 
+	cart := model.Cart{}
+	GormDB, err1 := IndexRepo.Getconnected()
+	if err1 != nil {
+		return nil, err1
+	}
+	q := GormDB.Model(&cart).Order("name").Find(&t)
+	p := paginator.New(adapter.NewGORMAdapter(q), 40)
+	p.SetPage(1)
+
+	
+	if err3 := p.Results(&t); err3 != nil {
+		return nil, httperors.NewNotFoundError("something went wrong paginating!")
+	}
+	IndexRepo.DbClose(GormDB)
+	return t, nil
+
+}
 func (cartRepo cartrepo) GetAll(carts []model.Cart) ([]model.Cart, *httperors.HttpError) {
 	GormDB, err1 :=IndexRepo.Getconnected()
 	if err1 != nil {
@@ -86,8 +132,8 @@ func (cartRepo cartrepo) Update(id int, cart *model.Cart) (*model.Cart, *httpero
 	if cart.Name  == "" {
 		cart.Name = acart.Name
 	}
-	if cart.Qty  == 0 {
-		cart.Qty = acart.Qty
+	if cart.Quantity  == 0 {
+		cart.Quantity = acart.Quantity
 	}
 	if cart.Price  == 0 {
 		cart.Price = acart.Price
@@ -167,7 +213,7 @@ func (cartRepo cartrepo)CarttoTransaction(code string) (tr []model.Transaction, 
 	GormDB.Where("code = ?", code).Find(&carts)
 	IndexRepo.DbClose(GormDB)
 	for _, c := range carts {
-		trans := model.Transaction{Productname:c.Name,Productid:c.ProductID,Qty: c.Qty,Price: c.Price,Tax:c.Tax, Code:code, Subtotal:c.Subtotal, Discount:c.Discount,Total:c.Total}
+		trans := model.Transaction{Productname:c.Name,Productid:c.ProductID,Quantity: c.Quantity,Price: c.Price,Tax:c.Tax, Code:code, Subtotal:c.Subtotal, Discount:c.Discount,Total:c.Total}
 		tr = append(tr, trans)
 	}
 	return tr,nil

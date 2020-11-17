@@ -6,19 +6,21 @@ import (
 )
 
 type Discount struct {
-	Name string `gorm:"not null"`
-	Product Product `gorm:"foreignKey:UserID; not null"`
-	ProductID uint `json:"userid"`
-	Buy bool
-	Amount float64 
+	Name string `gorm:"not null" json:"name"` 
+	Title string `gorm:"not null" json:"title"`
+	Description string `gorm:"not null" json:"description"`
 	gorm.Model
 }
 func (discount Discount) Validate() *httperors.HttpError{ 
-	if discount.Name == ""  {
+	if discount.Name == "" && len(discount.Name) < 3 {
 		return httperors.NewNotFoundError("Invalid Name")
 	}
-	if discount.Amount == 0 {
-		return httperors.NewNotFoundError("Invalid amount")
+	if discount.Title == "" && len(discount.Title) < 3 {
+		return httperors.NewNotFoundError("Invalid Title")
+	}
+	
+	if discount.Description == "" && len(discount.Description) < 10 {
+		return httperors.NewNotFoundError("Invalid description")
 	}
 	return nil
 }

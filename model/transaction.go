@@ -9,7 +9,7 @@ type Transaction struct {
 	Invoice   Invoice `gorm:"foreignKey:InvoiceID"`
 	Code string
 	Title string
-	Qty uint16 
+	Quantity float64 
 	Price float64 
 	Tax float64 
 	Subtotal float64 

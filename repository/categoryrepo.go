@@ -247,7 +247,7 @@ func (categoryRepo categoryrepo) Search(Ser *support.Search, categorys []model.C
 		if err3 := p.Results(&categorys); err3 != nil {
 			return nil, httperors.NewNotFoundError("something went wrong paginating!")
 		}
-	// break;
+	break;
 case "like":
 	// fmt.Println(Ser.Search_query_1)
 	if Ser.Search_query_1 == "all" {

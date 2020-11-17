@@ -24,10 +24,10 @@ func (service invoiceservice) Create(invoice *model.Invoice) (*model.Invoice, *h
 	 return invoice, nil
 
 }
-func (service invoiceservice) View() (string, *httperors.HttpError) {
+func (service invoiceservice) View() (*model.Cinvoiceoptions, *httperors.HttpError) {
 	code, err1 := r.Invoicerepo.View()
 	if err1 != nil {
-		return "", err1
+		return nil, err1
 	}
 	return code, nil
 }

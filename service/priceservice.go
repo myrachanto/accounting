@@ -27,6 +27,13 @@ func (service priceService) Create(price *model.Price) (*model.Price, *httperors
 	 return price, nil
 
 }
+func (service priceService) View() ([]model.Product, *httperors.HttpError) {
+	options, err1 := r.Pricerepo.View()
+	if err1 != nil {
+		return nil, err1
+	}
+	return options, nil
+}
 func (service priceService) GetOne(id int) (*model.Price, *httperors.HttpError) {
 	price, err1 := r.Pricerepo.GetOne(id)
 	if err1 != nil {

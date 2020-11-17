@@ -30,6 +30,32 @@ func (priceRepo pricerepo) Create(price *model.Price) (*model.Price, *httperors.
 	IndexRepo.DbClose(GormDB)
 	return price, nil
 }
+func (priceRepo pricerepo) View() ([]model.Product, *httperors.HttpError) {
+	p, e := Productrepo.All()
+	if e != nil{
+		return nil, e
+	}
+	return p, nil
+}
+func (priceRepo pricerepo) All() (t []model.Price, r *httperors.HttpError) {
+
+	price := model.Price{}
+	GormDB, err1 := IndexRepo.Getconnected()
+	if err1 != nil {
+		return nil, err1
+	}
+	q := GormDB.Model(&price).Order("name").Find(&t)
+	p := paginator.New(adapter.NewGORMAdapter(q), 40)
+	p.SetPage(1)
+
+	
+	if err3 := p.Results(&t); err3 != nil {
+		return nil, httperors.NewNotFoundError("something went wrong paginating!")
+	}
+	IndexRepo.DbClose(GormDB)
+	return t, nil
+
+}
 func (priceRepo pricerepo) GetOne(id int) (*model.Price, *httperors.HttpError) {
 	ok := priceRepo.ProductUserExistByid(id)
 	if !ok {
@@ -92,16 +118,20 @@ func (priceRepo pricerepo) Update(id int, price *model.Price) (*model.Price, *ht
 	}
 	aprice := model.Price{}
 	
-	GormDB.Model(&aprice).Where("id = ?", id).First(&aprice)
+	GormDB.Model(&price).Where("id = ?", id).First(&aprice)
 	if price.Name  == "" {
 		price.Name = aprice.Name
 	}
-	if price.Amount  == 0 {
-		price.Amount = aprice.Amount
+	if price.Title  == "" {
+		price.Title = aprice.Title
 	}
-	GormDB.Model(&price).Where("id = ?", id).First(&price).Update(&aprice)
-	
-	IndexRepo.DbClose(GormDB)
+	if price.Description  == "" {
+		price.Description = aprice.Description
+	}
+	if price.Product  == "" {
+		price.Product = aprice.Product
+	}
+	GormDB.Model(&price).Where("id = ?", id).Update(&price)
 
 	return price, nil
 }
@@ -228,14 +258,31 @@ func (priceRepo pricerepo) Search(Ser *support.Search, prices []model.Price)([]m
 		if err3 := p.Results(&prices); err3 != nil {
 			return nil, httperors.NewNotFoundError("something went wrong paginating!")
 		}
-	// break;
+		break
 	case "like":
-		q := GormDB.Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", "%"+Ser.Search_query_1+"%").Order(Ser.Column+" "+Ser.Direction).Find(&prices);
+		// fmt.Println(Ser.Search_query_1)
+		if Ser.Search_query_1 == "all" {
+				//db.Order("name DESC")
+		q := GormDB.Order(Ser.Column+" "+Ser.Direction).Find(&prices)
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////find some other paginator more effective one///////////////////////////////////////////
 		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(1)
+		p.SetPage(Ser.Page)
 		
-		if err3 := p.Results(&prices); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
+		fmt.Println(p.Results(&prices))
+				if err3 := p.Results(&prices); err3 != nil {
+					return nil, httperors.NewNotFoundError("something went wrong paginating!")
+				}
+	
+		}else {
+	
+			q := GormDB.Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", "%"+Ser.Search_query_1+"%").Order(Ser.Column+" "+Ser.Direction).Find(&prices);
+			p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
+			p.SetPage(Ser.Page)
+			fmt.Println(p.Results(&prices,))
+			if err3 := p.Results(&prices); err3 != nil {
+				return nil, httperors.NewNotFoundError("something went wrong paginating!")
+			}
 		}
 	break;
 	case "between":

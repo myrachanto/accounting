@@ -18,15 +18,49 @@ type cartController struct{ }
 func (controller cartController) Create(c echo.Context) error {
 	cart := &model.Cart{}
 	
-	if err := c.Bind(cart); err != nil {
-		httperror := httperors.NewBadRequestError("Invalid json body")
+	cart.Name = c.FormValue("name")
+	cart.Code = c.FormValue("code")
+	fmt.Println(cart.Code)
+	fmt.Println(c.FormValue("quantity"), "qty")
+	q, err := strconv.ParseFloat(c.FormValue("quantity"), 64)
+	if err != nil {
+		httperror := httperors.NewBadRequestError("Invalid quantity")
 		return c.JSON(httperror.Code, httperror)
-	}	
+	}
+	f, err := strconv.ParseFloat(c.FormValue("price"), 64)
+	if err != nil {
+		httperror := httperors.NewBadRequestError("Invalid price")
+		return c.JSON(httperror.Code, httperror)
+	}
+	t, err := strconv.ParseFloat(c.FormValue("tax"), 64)
+	if err != nil {
+		httperror := httperors.NewBadRequestError("Invalid tax")
+		return c.JSON(httperror.Code, httperror)
+	}
+
+	d, err := strconv.ParseFloat(c.FormValue("discount"), 64)
+	if err != nil {
+		httperror := httperors.NewBadRequestError("Invalid discount")
+		return c.JSON(httperror.Code, httperror)
+	}
+	cart.Price = f
+	cart.Quantity= q
+	cart.Discount = d
+	cart.Tax = t
 	createdcart, err1 := service.Cartservice.Create(cart)
 	if err1 != nil {
 		return c.JSON(err1.Code, err1)
 	}
 	return c.JSON(http.StatusCreated, createdcart)
+}
+
+func (controller cartController) View(c echo.Context) error {
+	code := c.Param("code")
+	options, problem := service.Cartservice.View(code)
+	if problem != nil {
+		return c.JSON(problem.Code, problem)
+	}
+	return c.JSON(http.StatusOK, options)	
 }
 func (controller cartController) GetAll(c echo.Context) error {
 	carts := []model.Cart{}

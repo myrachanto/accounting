@@ -29,10 +29,13 @@ type InvoiceItems struct {
 	Qty int
 	Price float64
 }
-type Coptions struct {
-	Code string
-	Customer []Customer
-	Product []Product
+type Cinvoiceoptions struct {
+	Code string `json:"code"`
+	Customers []Customer `json:"customers"`
+	Products []Product `json:"products"`
+	Taxs []Tax `json:"taxs"`
+	Prices []Price `json:"prices"`
+	Discounts []Discount `json:"discounts"`
 }
 type Roptions struct {
 	Customer []Customer

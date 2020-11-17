@@ -124,10 +124,14 @@ func (productRepo productrepo) Update(id int, product *model.Product) (*model.Pr
 	if product.Category  == "" {
 		product.Category = aproduct.Category
 	}
-	if product.Majorcategory  == "" {
+	if product.Majorcategory  == "" { 
 		product.Majorcategory = aproduct.Majorcategory
 	}
+	if product.Quantity  == 0 { 
+		product.Quantity = aproduct.Quantity
+	}
 	GormDB.Model(&aproduct).Where("id = ?", id).Update(&product)
+	
 	
 	IndexRepo.DbClose(GormDB)
 
