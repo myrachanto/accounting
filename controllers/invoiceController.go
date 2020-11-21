@@ -16,6 +16,32 @@ var (
 )
 type invoiceController struct{ }
 /////////controllers/////////////////
+func (controller invoiceController) CreateCart(c echo.Context) error {
+	cart := &model.Cart{}
+	cart.Name = c.FormValue("name")
+	cart.Code = c.FormValue("code")
+	sprice := c.FormValue("sprice")
+	quantity := c.FormValue("quantity")
+	fmt.Println(sprice, quantity, ">>>>>>>>>>>")
+	b, err := strconv.ParseFloat(c.FormValue("quantity"), 64)
+	if err != nil {
+		httperror := httperors.NewBadRequestError("Invalid buying price")
+		return c.JSON(httperror.Code, httperror)
+	}
+	s, err := strconv.ParseFloat(c.FormValue("sprice"), 64)
+	if err != nil {
+		httperror := httperors.NewBadRequestError("Invalid selling price")
+		return c.JSON(httperror.Code, httperror)
+	}
+	cart.Quantity = b
+	cart.SPrice = s
+	fmt.Println(cart)
+	createdcart, err1 := service.Cartservice.Create(cart)
+	if err1 != nil {
+		return c.JSON(err1.Code, err1)
+	}
+	return c.JSON(http.StatusCreated, createdcart)
+}
 func (controller invoiceController) Create(c echo.Context) error {
 	invoice := &model.Invoice{}
 	

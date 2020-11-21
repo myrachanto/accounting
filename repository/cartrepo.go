@@ -1,6 +1,7 @@
 package repository
 
 import (
+	// "fmt"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/myrachanto/accounting/httperors"
 	"github.com/myrachanto/accounting/model"
@@ -32,12 +33,15 @@ func (cartRepo cartrepo) Create(cart *model.Cart) (*model.Cart, *httperors.HttpE
 	// }
 	// cart.Code = code
 	
-	grossamount := cart.Quantity * cart.Price
+	grossamount := cart.Quantity * cart.SPrice
 	taxamount := cart.Tax/100 * grossamount
 	discountamount := cart.Discount/100 * grossamount
-	// console.log(grossamount,taxamount,discountamount)
+	// fmt.Println(grossamount,taxamount,discountamount)
+	// fmt.Println(cart)
 	cart.Total = grossamount - discountamount + taxamount
 	code := cart.Code
+	cart.Tax = taxamount
+	cart.Discount = discountamount
 	ok := Invoicerepo.InvoiceExistByCode(code)
 	if ok == true {
 		return nil, httperors.NewNotFoundError("That invoice is already saved!")
@@ -135,8 +139,8 @@ func (cartRepo cartrepo) Update(id int, cart *model.Cart) (*model.Cart, *httpero
 	if cart.Quantity  == 0 {
 		cart.Quantity = acart.Quantity
 	}
-	if cart.Price  == 0 {
-		cart.Price = acart.Price
+	if cart.SPrice  == 0 {
+		cart.SPrice = acart.SPrice
 	}
 	
 	if cart.Discount  == 0 {
@@ -213,7 +217,7 @@ func (cartRepo cartrepo)CarttoTransaction(code string) (tr []model.Transaction, 
 	GormDB.Where("code = ?", code).Find(&carts)
 	IndexRepo.DbClose(GormDB)
 	for _, c := range carts {
-		trans := model.Transaction{Productname:c.Name,Productid:c.ProductID,Quantity: c.Quantity,Price: c.Price,Tax:c.Tax, Code:code, Subtotal:c.Subtotal, Discount:c.Discount,Total:c.Total}
+		trans := model.Transaction{Productname:c.Name,Productid:c.ProductID,Quantity: c.Quantity,Price: c.SPrice,Tax:c.Tax, Code:code, Subtotal:c.Subtotal, Discount:c.Discount,Total:c.Total}
 		tr = append(tr, trans)
 	}
 	return tr,nil

@@ -36,6 +36,7 @@ type Cinvoiceoptions struct {
 	Taxs []Tax `json:"taxs"`
 	Prices []Price `json:"prices"`
 	Discounts []Discount `json:"discounts"`
+	Paymentform []Paymentform `json:"paymentforms"`
 }
 type Roptions struct {
 	Customer []Customer

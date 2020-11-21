@@ -64,6 +64,10 @@ func (invoiceRepo invoicerepo) View() (*model.Cinvoiceoptions, *httperors.HttpEr
 	if err6 != nil {
 		return nil, httperors.NewNotFoundError("You got an error fetching customers")
 	}
+	paymentforms,err7 := Paymentformrepo.All()
+	if err7 != nil {
+		return nil, httperors.NewNotFoundError("You got an error fetching customers")
+	}
 	code,err4 := invoiceRepo.GeneCode()
 	if err4 != nil {
 		return nil, httperors.NewNotFoundError("You got an error fetching customers")
@@ -74,6 +78,7 @@ func (invoiceRepo invoicerepo) View() (*model.Cinvoiceoptions, *httperors.HttpEr
 	CIOptions.Products = products
 	CIOptions.Prices = prices
 	CIOptions.Discounts = discounts
+	CIOptions.Paymentform = paymentforms
 	return CIOptions, nil
 } 
 func (invoiceRepo invoicerepo) GetOne(id int) (*model.Invoice, *httperors.HttpError) {

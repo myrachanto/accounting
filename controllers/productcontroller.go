@@ -26,12 +26,13 @@ func (controller productController) Create(c echo.Context) error {
 	product.Title = c.FormValue("title")
 	product.Description = c.FormValue("description")
 	product.Category = c.FormValue("category")
-	f, err := strconv.ParseFloat(c.FormValue("price"), 64)
+
+	s, err := strconv.ParseFloat(c.FormValue("sprice"), 64)
 	if err != nil {
-		httperror := httperors.NewBadRequestError("Invalid price")
+		httperror := httperors.NewBadRequestError("Invalid selling price")
 		return c.JSON(httperror.Code, httperror)
 	}
-	product.Price = f
+	product.SPrice = s
 	// // Multipart form
 		// Source
 
@@ -143,12 +144,22 @@ func (controller productController) Update(c echo.Context) error {
 	product.Title = c.FormValue("title")
 	product.Description = c.FormValue("description")
 	product.Category = c.FormValue("category")
-	f, err := strconv.ParseFloat(c.FormValue("price"), 64)
+	s := c.FormValue("sprice")
+	b, err := strconv.ParseFloat(s, 64)
 	if err != nil {
-		httperror := httperors.NewBadRequestError("Invalid price")
+		httperror := httperors.NewBadRequestError("Invalid buying price")
 		return c.JSON(httperror.Code, httperror)
 	}
-	product.Price = f
+
+	fmt.Println(product)
+	fmt.Println(s)
+	// s, err := strconv.ParseFloat(c.FormValue("sprice"), 64)
+	// if err != nil {
+	// 	httperror := httperors.NewBadRequestError("Invalid selling price")
+	// 	return c.JSON(httperror.Code, httperror)
+	// }
+	product.BPrice = b
+	// product.SPrice = s
 	// // Multipart form
 		// Source
 

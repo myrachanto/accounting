@@ -59,6 +59,7 @@ func (indexRepo indexRepo) Getconnected() (GormDB *gorm.DB, err *httperors.HttpE
 	GormDB.AutoMigrate(&model.Cart{})
 	GormDB.AutoMigrate(&model.Customer{})
 	GormDB.AutoMigrate(&model.Invoice{})
+	GormDB.AutoMigrate(&model.Paymentform{})
 	GormDB.AutoMigrate(&model.Transaction{})
 	/////supplier/////////////////////////
 	GormDB.AutoMigrate(&model.SInvoice{})

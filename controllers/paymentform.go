@@ -12,34 +12,25 @@ import(
 )
  
 var (
-	CategoryController categoryController = categoryController{}
+	PaymentformController paymentformController = paymentformController{}
 )
-type categoryController struct{ }
+type paymentformController struct{ }
 /////////controllers/////////////////
-func (controller categoryController) Create(c echo.Context) error {
-	category := &model.Category{}
+func (controller paymentformController) Create(c echo.Context) error {
+	paymentform := &model.Paymentform{}
 	
-	if err := c.Bind(category); err != nil {
+	if err := c.Bind(paymentform); err != nil {
 		httperror := httperors.NewBadRequestError("Invalid json body")
 		return c.JSON(httperror.Code, httperror)
 	}	
-
-	fmt.Println(category)
-	createdcategory, err1 := service.CategoryService.Create(category)
+	createdpaymentform, err1 := service.Paymentformservice.Create(paymentform)
 	if err1 != nil {
 		return c.JSON(err1.Code, err1)
 	}
-	return c.JSON(http.StatusCreated, createdcategory)
+	return c.JSON(http.StatusCreated, createdpaymentform)
 }
-func (controller categoryController) View(c echo.Context) error {
-	options, problem := service.CategoryService.View()
-	if problem != nil {
-		return c.JSON(problem.Code, problem)
-	}
-	return c.JSON(http.StatusOK, options)	
-}
-func (controller categoryController) GetAll(c echo.Context) error {
-	Categorys := []model.Category{}
+func (controller paymentformController) GetAll(c echo.Context) error {
+	paymentforms := []model.Paymentform{}
 	column := string(c.QueryParam("column"))
 	direction := string(c.QueryParam("direction"))
 	search_column := string(c.QueryParam("search_column"))
@@ -54,30 +45,30 @@ func (controller categoryController) GetAll(c echo.Context) error {
 	fmt.Println("------------------------")
 	search := &support.Search{Column:column, Direction:direction,Search_column:search_column,Search_operator:search_operator,Search_query_1:search_query_1,Search_query_2:search_query_2,Per_page:per_page}
 	
-	categorys, err3 := service.CategoryService.GetAll(Categorys,search)
+	paymentforms, err3 := service.Paymentformservice.GetAll(paymentforms,search)
 	if err3 != nil {
 		return c.JSON(err3.Code, err3)
 	}
-	return c.JSON(http.StatusOK, categorys)
+	return c.JSON(http.StatusOK, paymentforms)
 } 
-func (controller categoryController) GetOne(c echo.Context) error {
+func (controller paymentformController) GetOne(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		httperror := httperors.NewBadRequestError("Invalid ID")
 		return c.JSON(httperror.Code, httperror)
 	}
 	fmt.Println(id)
-	category, problem := service.CategoryService.GetOne(id)
+	paymentform, problem := service.Paymentformservice.GetOne(id)
 	if problem != nil {
 		return c.JSON(problem.Code, problem)
 	}
-	return c.JSON(http.StatusOK, category)	
+	return c.JSON(http.StatusOK, paymentform)	
 }
 
-func (controller categoryController) Update(c echo.Context) error {
+func (controller paymentformController) Update(c echo.Context) error {
 		
-	category :=  &model.Category{}
-	if err := c.Bind(category); err != nil {
+	paymentform :=  &model.Paymentform{}
+	if err := c.Bind(paymentform); err != nil {
 		httperror := httperors.NewBadRequestError("Invalid json body")
 		return c.JSON(httperror.Code, httperror)
 	}	
@@ -86,20 +77,20 @@ func (controller categoryController) Update(c echo.Context) error {
 		httperror := httperors.NewBadRequestError("Invalid ID")
 		return c.JSON(httperror.Code, httperror)
 	}
-	updatedcategory, problem := service.CategoryService.Update(id, category)
+	updatedpaymentform, problem := service.Paymentformservice.Update(id, paymentform)
 	if problem != nil {
 		return c.JSON(problem.Code, problem)
 	}
-	return c.JSON(http.StatusOK, updatedcategory)
+	return c.JSON(http.StatusOK, updatedpaymentform)
 }
 
-func (controller categoryController) Delete(c echo.Context) error {
+func (controller paymentformController) Delete(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		httperror := httperors.NewBadRequestError("Invalid ID")
 		return c.JSON(httperror.Code, httperror)
 	}
-	success, failure := service.CategoryService.Delete(id)
+	success, failure := service.Paymentformservice.Delete(id)
 	if failure != nil {
 		return c.JSON(failure.Code, failure)
 	}

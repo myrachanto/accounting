@@ -22,10 +22,14 @@ type userController struct{ }
 func (controller userController) Register(c echo.Context) error {
 	fmt.Println("endpoint called!")
 	user := &model.User{}
-	if err := c.Bind(user); err != nil {
-		httperror := httperors.NewBadRequestError("Invalid user json body")
-		return c.JSON(httperror.Code, httperror)
-	}
+	
+	user.FName = c.FormValue("fname")
+	user.UName = c.FormValue("uname")
+	user.LName = c.FormValue("lname")
+	user.Phone = c.FormValue("phone")
+	user.Address = c.FormValue("address")
+	user.Email = c.FormValue("email")
+	user.Password = c.FormValue("password")
 	createdUser, err1 := service.UserService.Create(user)
 	if err1 != nil {
 		return c.JSON(err1.Code, err1)
@@ -81,11 +85,9 @@ func (controller userController) Create(c echo.Context) error {
 func (controller userController) Login(c echo.Context) error {
 	user := &model.LoginUser{}
 	auth := &model.Auth{}
-	if err := c.Bind(user); err != nil {
-		httperror := httperors.NewBadRequestError("Invalid json body")
-		return c.JSON(httperror.Code, httperror)
-	}	
 	
+	user.Email = c.FormValue("email")
+	user.Password = c.FormValue("password")
 	auth, problem := service.UserService.Login(user)
 	if problem != nil {
 		fmt.Println(problem)

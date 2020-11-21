@@ -8,8 +8,9 @@ type Cart struct {
 	ProductID uint `json:"productid"`
 	Code string `json:"code" json:"code"`
 	Name string `gorm:"not null" json:"name"`
+	Customername string `gorm:"not null" json:"customername"`
 	Quantity float64 `gorm:"not null" json:"quantity"`
-	Price float64 `gorm:"not null" son:"price"`
+	SPrice float64 `gorm:"not null" son:"sprice"`
 	Subtotal float64 `gorm:"not null"`
 	Discount float64 `json:"discount"`
 	Tax float64 `json:"tax"`

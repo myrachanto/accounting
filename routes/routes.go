@@ -54,7 +54,7 @@ func StoreApi() {
 	// Routes
 	//e.GET("/is-loggedin", h.private, IsLoggedIn)
 	//e.POST("/register", IsLoggedIn,isAdmin,isEmployee,isSupervisor, controllers.UserController.Create)
-	e.POST("/register", controllers.UserController.Create)
+	e.POST("/register", controllers.UserController.Register)
 	e.POST("/login", controllers.UserController.Login)
 	JWTgroup.GET("logout/:token", controllers.UserController.Logout)
 	JWTgroup.GET("users", controllers.UserController.GetAll)
@@ -92,6 +92,12 @@ func StoreApi() {
 	JWTgroup.GET("majorcategory/:id", controllers.MCategoryController.GetOne)
 	JWTgroup.PUT("majorcategory/:id", controllers.MCategoryController.Update)
 	JWTgroup.DELETE("majorcategory/:id", controllers.MCategoryController.Delete)
+	///////////paymentform/////////////////////////////	
+	JWTgroup.POST("paymentform", controllers.PaymentformController.Create)
+	JWTgroup.GET("paymentform", controllers.PaymentformController.GetAll)
+	JWTgroup.GET("paymentform/:id", controllers.PaymentformController.GetOne)
+	JWTgroup.PUT("paymentform/:id", controllers.PaymentformController.Update)
+	JWTgroup.DELETE("paymentform/:id", controllers.PaymentformController.Delete)
 	///////////subcategory/////////////////////////////	
 	JWTgroup.POST("subcategory", controllers.SubcategoryController.Create)
 	JWTgroup.GET("subcategory", controllers.SubcategoryController.GetAll)
@@ -108,14 +114,12 @@ func StoreApi() {
 	JWTgroup.PUT("products/:id", controllers.ProductController.Update)
 	JWTgroup.DELETE("products/:id", controllers.ProductController.Delete)
 	///////////cart/////////////////////////////	
-	// JWTgroup.GET("cart/create", controllers.CartController.View)
-	JWTgroup.POST("cart", controllers.CartController.Create)
-	JWTgroup.GET("cart", controllers.CartController.GetAll)
-	JWTgroup.GET("cart/view/:id", controllers.CartController.View)
-	JWTgroup.GET("cart/:id", controllers.CartController.GetOne)
-	JWTgroup.PUT("cart/:id", controllers.CartController.Update)
-	JWTgroup.DELETE("cart/:id", controllers.CartController.Delete)
-	//////////////////////////////////////////////////////////////////////////
+	JWTgroup.POST("carts", controllers.CartController.Create)
+	JWTgroup.GET("carts/view/:code", controllers.CartController.View)
+	JWTgroup.GET("carts/:id", controllers.CartController.GetOne)
+	JWTgroup.PUT("carts/:id", controllers.CartController.Update)
+	JWTgroup.DELETE("carts/:id", controllers.CartController.Delete)
+	///////////////////////////////////carts
 	///////////////////customer module///////////////////////////////////////
 	///////////Invoice/////////////////////////////	////////////////////////
 	JWTgroup.POST("customer", controllers.CustomerController.Create)
@@ -124,6 +128,7 @@ func StoreApi() {
 	JWTgroup.PUT("customer/:id", controllers.CustomerController.Update)
 	JWTgroup.DELETE("customer/:id", controllers.CustomerController.Delete)
 	///////////Invoice/////////////////////////////	
+	JWTgroup.POST("invoicescart", controllers.InvoiceController.CreateCart)
 	JWTgroup.GET("invoice/view", controllers.InvoiceController.View)
 	JWTgroup.POST("invoice", controllers.InvoiceController.Create)
 	JWTgroup.GET("invoice", controllers.InvoiceController.GetAll)

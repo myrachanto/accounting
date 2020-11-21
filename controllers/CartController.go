@@ -13,47 +13,45 @@ import(
 var (
 	CartController cartController = cartController{}
 )
+
 type cartController struct{ }
 /////////controllers/////////////////
 func (controller cartController) Create(c echo.Context) error {
 	cart := &model.Cart{}
-	
+	cart.Customername = c.FormValue("customername")
 	cart.Name = c.FormValue("name")
 	cart.Code = c.FormValue("code")
-	fmt.Println(cart.Code)
-	fmt.Println(c.FormValue("quantity"), "qty")
 	q, err := strconv.ParseFloat(c.FormValue("quantity"), 64)
 	if err != nil {
 		httperror := httperors.NewBadRequestError("Invalid quantity")
 		return c.JSON(httperror.Code, httperror)
 	}
-	f, err := strconv.ParseFloat(c.FormValue("price"), 64)
+	s, err := strconv.ParseFloat(c.FormValue("sprice"), 64)
 	if err != nil {
-		httperror := httperors.NewBadRequestError("Invalid price")
+		httperror := httperors.NewBadRequestError("Invalid selling price")
 		return c.JSON(httperror.Code, httperror)
 	}
 	t, err := strconv.ParseFloat(c.FormValue("tax"), 64)
 	if err != nil {
-		httperror := httperors.NewBadRequestError("Invalid tax")
+		httperror := httperors.NewBadRequestError("Invalid tax ")
 		return c.JSON(httperror.Code, httperror)
 	}
-
 	d, err := strconv.ParseFloat(c.FormValue("discount"), 64)
 	if err != nil {
 		httperror := httperors.NewBadRequestError("Invalid discount")
 		return c.JSON(httperror.Code, httperror)
 	}
-	cart.Price = f
-	cart.Quantity= q
+	cart.Quantity = q
+	cart.SPrice = s
+	cart.Tax =t
 	cart.Discount = d
-	cart.Tax = t
+	fmt.Println(cart, ",,,,,,,,,,,,,,,,,,,,")
 	createdcart, err1 := service.Cartservice.Create(cart)
 	if err1 != nil {
 		return c.JSON(err1.Code, err1)
 	}
 	return c.JSON(http.StatusCreated, createdcart)
 }
-
 func (controller cartController) View(c echo.Context) error {
 	code := c.Param("code")
 	options, problem := service.Cartservice.View(code)
@@ -62,14 +60,7 @@ func (controller cartController) View(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, options)	
 }
-func (controller cartController) GetAll(c echo.Context) error {
-	carts := []model.Cart{}
-	carts, err3 := service.Cartservice.GetAll(carts)
-	if err3 != nil {
-		return c.JSON(err3.Code, err3)
-	}
-	return c.JSON(http.StatusOK, carts)
-} 
+
 func (controller cartController) GetOne(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
