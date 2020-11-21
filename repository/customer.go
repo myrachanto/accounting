@@ -10,10 +10,8 @@ import (
 	"github.com/myrachanto/accounting/httperors"
 	"github.com/myrachanto/accounting/model"
 	"github.com/myrachanto/accounting/support"
-	"github.com/vcraescu/go-paginator"
-	"github.com/vcraescu/go-paginator/adapter"
 )
-  
+//Customerrepo ...
 var (
 	Customerrepo customerrepo = customerrepo{}
 )
@@ -108,7 +106,8 @@ func (customerRepo customerrepo) Logout(token string) (*httperors.HttpError) {
 	if err1 != nil {
 		return err1
 	}
-	if GormDB.First(&auth, "token =?", token).RecordNotFound(){
+	res := GormDB.First(&auth, "token =?", token)
+	if res.Error != nil {
 		return httperors.NewNotFoundError("Something went wrong logging out!")
 	 }
 	
@@ -169,14 +168,7 @@ func (customerRepo customerrepo) All() (t []model.Customer, r *httperors.HttpErr
 	if err1 != nil {
 		return nil, err1
 	}
-	q := GormDB.Model(&customer).Order("name").Find(&t)
-	p := paginator.New(adapter.NewGORMAdapter(q), 40)
-	p.SetPage(1)
-
-	
-	if err3 := p.Results(&t); err3 != nil {
-		return nil, httperors.NewNotFoundError("something went wrong paginating!")
-	}
+	GormDB.Model(&customer).Order("name").Find(&t)
 	IndexRepo.DbClose(GormDB)
 	return t, nil
 
@@ -224,7 +216,7 @@ func (customerRepo customerrepo) Update(id int, customer *model.Customer) (*mode
 	if customer.Picture  == "" {
 		customer.Picture = acustomer.Picture
 	}
-	GormDB.Model(&acustomer).Where("id = ?", id).Update(&customer)
+	GormDB.Save(&customer)
 	
 	IndexRepo.DbClose(GormDB)
 
@@ -251,9 +243,10 @@ func (customerRepo customerrepo)customercustomerExistByid(id int) bool {
 	if err1 != nil {
 		return false
 	}
-	if GormDB.First(&customer, "id =?", id).RecordNotFound(){
-	   return false
-	}
+	res := GormDB.First(&customer, "id =?", id)
+		if res.Error != nil {
+			return false
+		}
 	IndexRepo.DbClose(GormDB)
 	return true
 	
@@ -264,7 +257,8 @@ func (customerRepo customerrepo)customerExist(email string) bool {
 	if err1 != nil {
 		return false
 	}
-	if GormDB.First(&customer, "email =?", email).RecordNotFound(){
+	res := GormDB.First(&customer, "email =?", email)
+	if res.Error != nil {
 	   return false
 	}
 	IndexRepo.DbClose(GormDB)
@@ -277,7 +271,8 @@ func (customerRepo customerrepo)customerExistByid(id int) bool {
 	if err1 != nil {
 		return false
 	}
-	if GormDB.First(&customer, "id =?", id).RecordNotFound(){
+	res := GormDB.First(&customer, "id =?", id)
+	if res.Error != nil {
 	   return false
 	}
 	IndexRepo.DbClose(GormDB)
@@ -295,131 +290,66 @@ func (customerRepo customerrepo) Search(Ser *support.Search, customers []model.C
 	switch(Ser.Search_operator){
 	case "all":
 		//db.Order("name DESC")
-		q := GormDB.Model(&customer).Order(Ser.Column+" "+Ser.Direction).Find(&customers)
+		GormDB.Model(&customer).Order(Ser.Column+" "+Ser.Direction).Find(&customers)
 		///////////////////////////////////////////////////////////////////////////////////////////////////////
 		///////////////find some other paginator more effective one///////////////////////////////////////////
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
 		
-		if err3 := p.Results(&customers); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	break;
 	case "equal_to":
-		q := GormDB.Preload("Invoices").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&customers);
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
+		GormDB.Preload("Invoices").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&customers);
 		
-		if err3 := p.Results(&customers); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	break;
 	case "not_equal_to":
-		q := GormDB.Preload("Invoices").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&customers);	
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
+		GormDB.Preload("Invoices").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&customers);	
 		
-		if err3 := p.Results(&customers); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	break;
 	case "less_than" :
 		// order := &Order
 		// db.Where("id = ? and status = ?", reqOrder.id, "cart")
 		// .Preload("OrderItems").Preload("OrderItems.Item").First(&order)
-		q := GormDB.Preload("Invoices").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&customers);	
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
+		GormDB.Preload("Invoices").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&customers);	
 		
-		if err3 := p.Results(&customers); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	break;
 	case "greater_than":
-		q := GormDB.Preload("Invoices").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&customers);	
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
+		GormDB.Preload("Invoices").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&customers);	
 		
-		if err3 := p.Results(&customers); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	break;
 	case "less_than_or_equal_to":
-		q := GormDB.Preload("Invoices").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&customers);	
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
+		GormDB.Preload("Invoices").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&customers);	
 		
-		if err3 := p.Results(&customers); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	break;
 	case "greater_than_ro_equal_to":
-		q := GormDB.Preload("Invoices").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&customers);	
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
+		GormDB.Preload("Invoices").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&customers);	
 		
-		if err3 := p.Results(&customers); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	break;
 		 case "in":
 			// db.Where("name IN (?)", []string{"myrachanto", "anto"}).Find(&customers)
 		s := strings.Split(Ser.Search_query_1,",")
 		fmt.Println(s)
-		q := GormDB.Preload("Invoices").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"(?)", s).Order(Ser.Column+" "+Ser.Direction).Find(&customers);
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
+		GormDB.Preload("Invoices").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"(?)", s).Order(Ser.Column+" "+Ser.Direction).Find(&customers);
 		
-		if err3 := p.Results(&customers); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 		break;
 	 case "not_in":
 			//db.Not("name", []string{"jinzhu", "jinzhu 2"}).Find(&customers)
 		s := strings.Split(Ser.Search_query_1,",")
-		q := GormDB.Preload("Invoices").Not(Ser.Search_column, s).Order(Ser.Column+" "+Ser.Direction).Find(&customers);
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
+		GormDB.Preload("Invoices").Not(Ser.Search_column, s).Order(Ser.Column+" "+Ser.Direction).Find(&customers);
 		
-		if err3 := p.Results(&customers); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	// break;
 case "like":
 	// fmt.Println(Ser.Search_query_1)
 	if Ser.Search_query_1 == "all" {
 			//db.Order("name DESC")
-	q := GormDB.Order(Ser.Column+" "+Ser.Direction).Find(&customers)
-	///////////////////////////////////////////////////////////////////////////////////////////////////////
-	///////////////find some other paginator more effective one///////////////////////////////////////////
-	p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-	p.SetPage(Ser.Page)
-	
-	fmt.Println(p.Results(&customers))
-			if err3 := p.Results(&customers); err3 != nil {
-				return nil, httperors.NewNotFoundError("something went wrong paginating!")
-			}
+	GormDB.Order(Ser.Column+" "+Ser.Direction).Find(&customers)
 
 	}else {
 
-		q := GormDB.Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", "%"+Ser.Search_query_1+"%").Order(Ser.Column+" "+Ser.Direction).Find(&customers);
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
-		fmt.Println(p.Results(&customers,))
-		if err3 := p.Results(&customers); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
+		GormDB.Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", "%"+Ser.Search_query_1+"%").Order(Ser.Column+" "+Ser.Direction).Find(&customers);
 	}
 break;
 	case "between":
 		//db.Where("name BETWEEN ? AND ?", "lastWeek, today").Find(&customers)
-		q := GormDB.Preload("Invoices").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"? AND ?", Ser.Search_query_1, Ser.Search_query_2).Order(Ser.Column+" "+Ser.Direction).Find(&customers);
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
+		GormDB.Preload("Invoices").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"? AND ?", Ser.Search_query_1, Ser.Search_query_2).Order(Ser.Column+" "+Ser.Direction).Find(&customers);
 		
-		if err3 := p.Results(&customers); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	   break;
 	default:
 	return nil, httperors.NewNotFoundError("check your operator!")

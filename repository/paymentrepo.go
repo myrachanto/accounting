@@ -3,14 +3,11 @@ package repository
 import (
 	"fmt"
 	"strings"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/myrachanto/accounting/httperors"
 	"github.com/myrachanto/accounting/model"
 	"github.com/myrachanto/accounting/support"
-	"github.com/vcraescu/go-paginator" 
-	"github.com/vcraescu/go-paginator/adapter"
 )
-
+//Paymentrepo ..
 var (
 	Paymentrepo paymentrepo = paymentrepo{}
 )
@@ -81,7 +78,7 @@ func (paymentRepo paymentrepo) Update(id int, payment *model.Payment) (*model.Pa
 	// if payment.AmountPaid  == 0 {
 	// 	payment.AmountPaid = apayment.AmountPaid
 	// }
-	GormDB.Model(&payment).Where("id = ?", id).First(&payment).Update(&apayment)
+	GormDB.Save(&payment)
 	
 	IndexRepo.DbClose(GormDB)
 
@@ -108,7 +105,8 @@ func (paymentRepo paymentrepo)paymentUserExistByid(id int) bool {
 	if err1 != nil {
 		return false
 	}
-	if GormDB.First(&payment, "id =?", id).RecordNotFound(){
+	res := GormDB.First(&payment, "id =?", id)
+	if res.Error != nil{
 	   return false
 	}
 	IndexRepo.DbClose(GormDB)
@@ -124,111 +122,56 @@ func (paymentRepo paymentrepo) Search(Ser *support.Search, payments []model.Paym
 	payment := model.Payment{}
 	switch(Ser.Search_operator){
 	case "all":
-		q := GormDB.Preload("Payrectrasans").Model(&payment).Order(Ser.Column+" "+Ser.Direction).Find(&payments)
+		GormDB.Preload("Payrectrasans").Model(&payment).Order(Ser.Column+" "+Ser.Direction).Find(&payments)
 		///////////////////////////////////////////////////////////////////////////////////////////////////////
 		///////////////find some other paginator more effective one///////////////////////////////////////////
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(1)
 		
-		if err3 := p.Results(&payments); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	break;
 	case "equal_to":
-		q := GormDB.Preload("Payrectrasans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&payments);
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(1)
+		GormDB.Preload("Payrectrasans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&payments);
 		
-		if err3 := p.Results(&payments); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	break;
 	case "not_equal_to":
-		q := GormDB.Preload("Payrectrasans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&payments);	
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(1)
+		GormDB.Preload("Payrectrasans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&payments);	
 		
-		if err3 := p.Results(&payments); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	break;
 	case "less_than" :
-		q := GormDB.Preload("Payrectrasans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&payments);	
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(1)
+		GormDB.Preload("Payrectrasans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&payments);	
 		
-		if err3 := p.Results(&payments); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	break;
 	case "greater_than":
-		q := GormDB.Preload("Payrectrasans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&payments);	
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(1)
+		GormDB.Preload("Payrectrasans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&payments);	
 		
-		if err3 := p.Results(&payments); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	break;
 	case "less_than_or_equal_to":
-		q := GormDB.Preload("Payrectrasans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&payments);	
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(1)
+		GormDB.Preload("Payrectrasans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&payments);	
 		
-		if err3 := p.Results(&payments); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	break;
 	case "greater_than_ro_equal_to":
-		q := GormDB.Preload("Payrectrasans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&payments);	
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(1)
+		GormDB.Preload("Payrectrasans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&payments);	
 		
-		if err3 := p.Results(&payments); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	break;
 		 case "in":
 			// db.Where("name IN (?)", []string{"myrachanto", "anto"}).Find(&users)
 		s := strings.Split(Ser.Search_query_1,",")
 		fmt.Println(s)
-		q := GormDB.Preload("Payrectrasans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"(?)", s).Order(Ser.Column+" "+Ser.Direction).Find(&payments);
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(1)
+		GormDB.Preload("Payrectrasans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"(?)", s).Order(Ser.Column+" "+Ser.Direction).Find(&payments);
 		
-		if err3 := p.Results(&payments); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 		break;
 	 case "not_in":
 			//db.Not("name", []string{"jinzhu", "jinzhu 2"}).Find(&users)
 		s := strings.Split(Ser.Search_query_1,",")
-		q := GormDB.Preload("Payrectrasans").Not(Ser.Search_column, s).Order(Ser.Column+" "+Ser.Direction).Find(&payments);
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(1)
+		GormDB.Preload("Payrectrasans").Not(Ser.Search_column, s).Order(Ser.Column+" "+Ser.Direction).Find(&payments);
 		
-		if err3 := p.Results(&payments); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	// break;
 	case "like":
-		q := GormDB.Preload("Payrectrasans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", "%"+Ser.Search_query_1+"%").Order(Ser.Column+" "+Ser.Direction).Find(&payments);
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(1)
+		GormDB.Preload("Payrectrasans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", "%"+Ser.Search_query_1+"%").Order(Ser.Column+" "+Ser.Direction).Find(&payments);
 		
-		if err3 := p.Results(&payments); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	break;
 	case "between":
 		//db.Where("name BETWEEN ? AND ?", "lastWeek, today").Find(&users)
-		q := GormDB.Preload("Payrectrasans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"? AND ?", Ser.Search_query_1, Ser.Search_query_2).Order(Ser.Column+" "+Ser.Direction).Find(&payments);
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(1)
+		GormDB.Preload("Payrectrasans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"? AND ?", Ser.Search_query_1, Ser.Search_query_2).Order(Ser.Column+" "+Ser.Direction).Find(&payments);
 		
-		if err3 := p.Results(&payments); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
 	   break;
 	default:
 	return nil, httperors.NewNotFoundError("check your operator!")

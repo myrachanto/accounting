@@ -1,12 +1,11 @@
 package repository
 
 import (
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/myrachanto/accounting/httperors"
 	"github.com/myrachanto/accounting/model"
 	// "github.com/myrachanto/accounting/support"
 )
-
+//Scartrepo ...
 var (
 	Scartrepo scartrepo = scartrepo{}
 )
@@ -106,7 +105,7 @@ func (scartRepo scartrepo) Update(id int, scart *model.Scart) (*model.Scart, *ht
 	if scart.Tax  == 0 {
 		scart.Tax = ascart.Tax
 	}
-	GormDB.Model(&scart).Where("id = ?", id).First(&scart).Update(&ascart)
+	GormDB.Save(&scart)
 	
 	IndexRepo.DbClose(GormDB)
 
@@ -133,7 +132,8 @@ func (scartRepo scartrepo)scartUserExistByid(id int) bool {
 	if err1 != nil {
 		return false
 	}
-	if GormDB.First(&scart, "id =?", id).RecordNotFound(){
+	res := GormDB.First(&scart, "id =?", id)
+	if res.Error != nil{
 	   return false
 	}
 	IndexRepo.DbClose(GormDB)

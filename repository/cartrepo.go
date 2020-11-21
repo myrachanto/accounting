@@ -2,16 +2,14 @@ package repository
 
 import (
 	// "fmt"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/myrachanto/accounting/httperors"
 	"github.com/myrachanto/accounting/model"
-	"github.com/vcraescu/go-paginator" 
-	"github.com/vcraescu/go-paginator/adapter"
 )
-
+//Cartrepo...
 var (
 	Cartrepo cartrepo = cartrepo{}
 )
+//Totals ...
 type Totals struct {
 	Discount float64
 	Subtotal float64
@@ -93,14 +91,7 @@ func (cartRepo cartrepo) All() (t []model.Cart, r *httperors.HttpError) {
 	if err1 != nil {
 		return nil, err1
 	}
-	q := GormDB.Model(&cart).Order("name").Find(&t)
-	p := paginator.New(adapter.NewGORMAdapter(q), 40)
-	p.SetPage(1)
-
-	
-	if err3 := p.Results(&t); err3 != nil {
-		return nil, httperors.NewNotFoundError("something went wrong paginating!")
-	}
+	GormDB.Model(&cart).Order("name").Find(&t)
 	IndexRepo.DbClose(GormDB)
 	return t, nil
 
@@ -149,7 +140,7 @@ func (cartRepo cartrepo) Update(id int, cart *model.Cart) (*model.Cart, *httpero
 	if cart.Tax  == 0 {
 		cart.Tax = acart.Tax
 	}
-	GormDB.Model(&cart).Where("id = ?", id).First(&cart).Update(&acart)
+	GormDB.Save(&cart)
 	
 	IndexRepo.DbClose(GormDB)
 
@@ -186,7 +177,8 @@ func (cartRepo cartrepo)cartUserExistByid(id int) bool {
 	if err1 != nil {
 		return false
 	}
-	if GormDB.First(&cart, "id =?", id).RecordNotFound(){
+	res := GormDB.First(&cart, "id =?", id)
+	if res.Error != nil {
 	   return false
 	}
 	IndexRepo.DbClose(GormDB)

@@ -4,13 +4,12 @@ import (
 	// "log"
 	// "os"
 	// "github.com/joho/godotenv"
-	"github.com/jinzhu/gorm"
-    _ "github.com/jinzhu/gorm/dialects/sqlite"
-	// _ "github.com/jinzhu/gorm/dialects/mysql"
+  "gorm.io/driver/sqlite"
+  "gorm.io/gorm"
 	"github.com/myrachanto/accounting/httperors"
 	"github.com/myrachanto/accounting/model"
-	// "github.com/myrachanto/accounting/support"
 )
+//IndexRepo
 var (
 	IndexRepo indexRepo = indexRepo{}
 	Operator = map[string]string{"all":"all","equal_to":"=","not_equal_to":"<>","less_than":"<",
@@ -32,7 +31,9 @@ func (indexRepo indexRepo) Getconnected() (GormDB *gorm.DB, err *httperors.HttpE
 	// if err2 != nil {
 	// 	return nil, httperors.NewNotFoundError("No Mysql db connection")
 	// }
-	GormDB, err1 := gorm.Open("sqlite3", "accounting.db")
+	// GormDB, err1 := gorm.Open("sqlite3", "accounting.db")
+
+	GormDB, err1 := gorm.Open(sqlite.Open("accounting.db"), &gorm.Config{})
     if err1 != nil {
         panic("failed to connect database")
     }
@@ -78,5 +79,5 @@ func (indexRepo indexRepo) Getconnected() (GormDB *gorm.DB, err *httperors.HttpE
 	return GormDB, nil
 }
 func (indexRepo indexRepo) DbClose(GormDB *gorm.DB) {
-	defer GormDB.Close()
+	// defer GormDB.Close()
 }

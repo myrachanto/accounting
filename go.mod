@@ -13,4 +13,6 @@ require (
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	github.com/vcraescu/go-paginator v0.0.0-20200923074551-426b20f3ae8a
 	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897
+	gorm.io/driver/sqlite v1.1.3
+	gorm.io/gorm v1.20.7
 )

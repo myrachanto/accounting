@@ -6,10 +6,8 @@ import (
 	"github.com/myrachanto/accounting/httperors"
 	"github.com/myrachanto/accounting/model"
 	"github.com/myrachanto/accounting/support"
-	"github.com/vcraescu/go-paginator" 
-	"github.com/vcraescu/go-paginator/adapter"
 )
- 
+ //Liabilityrepo ...
 var (
 	Liabilityrepo liabilityrepo = liabilityrepo{}
 )
@@ -89,8 +87,7 @@ func (liabilityRepo liabilityrepo) Update(id int, liability *model.Liability) (*
 	if liability.Interestrate  < 0 {
 		liability.Interestrate = aliability.Interestrate
 	}
-	GormDB.Model(&liability).Where("id = ?", id).First(&liability).Update(&aliability)
-	
+	GormDB.Save(&liability)
 	IndexRepo.DbClose(GormDB)
 
 	return liability, nil
@@ -116,7 +113,8 @@ func (liabilityRepo liabilityrepo)liabilityUserExistByid(id int) bool {
 	if err1 != nil {
 		return false
 	}
-	if GormDB.First(&liability, "id =?", id).RecordNotFound(){
+	res := GormDB.First(&liability, "id =?", id)
+	if res.Error != nil{
 	   return false
 	}
 	IndexRepo.DbClose(GormDB)
@@ -133,111 +131,56 @@ func (liabilityRepo liabilityrepo) Search(Ser *support.Search, liabilitys []mode
 	switch(Ser.Search_operator){
 	case "all":
 		//db.Order("name DESC")
-		q := GormDB.Preload("Liatrans").Model(&liability).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys)
+		GormDB.Preload("Liatrans").Model(&liability).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys)
 		///////////////////////////////////////////////////////////////////////////////////////////////////////
 		///////////////find some other paginator more effective one///////////////////////////////////////////
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
-		
-		if err3 := p.Results(&liabilitys); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
+	
 	break;
 	case "equal_to":
-		q := GormDB.Preload("Liatrans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
-		
-		if err3 := p.Results(&liabilitys); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
+		GormDB.Preload("Liatrans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);
+	
 	break;
 	case "not_equal_to":
-		q := GormDB.Preload("Liatrans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);	
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
-		
-		if err3 := p.Results(&liabilitys); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
+		GormDB.Preload("Liatrans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);	
+	
 	break;
 	case "less_than" :
-		q := GormDB.Preload("Liatrans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);	
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
-		
-		if err3 := p.Results(&liabilitys); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
+		GormDB.Preload("Liatrans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);	
+	
 	break;
 	case "greater_than":
-		q := GormDB.Preload("Liatrans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);	
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
-		
-		if err3 := p.Results(&liabilitys); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
+		GormDB.Preload("Liatrans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);	
+	
 	break;
 	case "less_than_or_equal_to":
-		q := GormDB.Preload("Liatrans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);	
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
-		
-		if err3 := p.Results(&liabilitys); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
+		GormDB.Preload("Liatrans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);	
+	
 	break;
 	case "greater_than_ro_equal_to":
-		q := GormDB.Preload("Liatrans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);	
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
-		
-		if err3 := p.Results(&liabilitys); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
+		GormDB.Preload("Liatrans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", Ser.Search_query_1).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);	
+	
 	break;
 		 case "in":
 			// db.Where("name IN (?)", []string{"myrachanto", "anto"}).Find(&users)
 		s := strings.Split(Ser.Search_query_1,",")
 		fmt.Println(s)
-		q := GormDB.Preload("Liatrans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"(?)", s).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
-		
-		if err3 := p.Results(&liabilitys); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
+		GormDB.Preload("Liatrans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"(?)", s).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);
+	
 		break;
 	 case "not_in":
 			//db.Not("name", []string{"jinzhu", "jinzhu 2"}).Find(&users)
 		s := strings.Split(Ser.Search_query_1,",")
-		q := GormDB.Preload("Liatrans").Not(Ser.Search_column, s).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
-		
-		if err3 := p.Results(&liabilitys); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
+		GormDB.Preload("Liatrans").Not(Ser.Search_column, s).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);
+	
 	// break;
 	case "like":
-		q := GormDB.Preload("Liatrans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", "%"+Ser.Search_query_1+"%").Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
-		
-		if err3 := p.Results(&liabilitys); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
+		GormDB.Preload("Liatrans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"?", "%"+Ser.Search_query_1+"%").Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);
+	
 	break;
 	case "between":
 		//db.Where("name BETWEEN ? AND ?", "lastWeek, today").Find(&users)
-		q := GormDB.Preload("Liatrans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"? AND ?", Ser.Search_query_1, Ser.Search_query_2).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);
-		p := paginator.New(adapter.NewGORMAdapter(q), Ser.Per_page)
-		p.SetPage(Ser.Page)
-		
-		if err3 := p.Results(&liabilitys); err3 != nil {
-			return nil, httperors.NewNotFoundError("something went wrong paginating!")
-		}
+		GormDB.Preload("Liatrans").Where(Ser.Search_column+" "+Operator[Ser.Search_operator]+"? AND ?", Ser.Search_query_1, Ser.Search_query_2).Order(Ser.Column+" "+Ser.Direction).Find(&liabilitys);
+	
 	   break;
 	default:
 	return nil, httperors.NewNotFoundError("check your operator!")
